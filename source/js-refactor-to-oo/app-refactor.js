@@ -11,6 +11,7 @@ var DieController = function (view, diceCollection) {
 DieController.prototype.bindEventListener = function () {
   var controller = this;
   $('#roller button.add').on('click', this.addNewDie.bind(controller));
+  $('#roller button.roll').on('click', this.rollDice.bind(controller));
 };
 
 DieController.prototype.addNewDie = function () {
@@ -18,6 +19,14 @@ DieController.prototype.addNewDie = function () {
   this.collection.add(die);
   var dieTemplate = this.view.createDieTemplate(die.value);
   this.view.renderDieToContainer(dieTemplate);
+};
+
+DieController.prototype.rollDice = function () {
+  var controller = this;
+  var collection = this.collection.rollDice();
+  $(collection).each(function(index, die) {
+    this.view.renderNewValues(die.value, index)
+  }.bind(controller));
 };
 
 // ------------------------------------
@@ -33,12 +42,20 @@ DieView.prototype.createDieTemplate = function (dieValue) {
   return '<div class="die">' + dieValue + '</div>';
 };
 
+DieView.prototype.renderNewValues = function (dieValue, index) {
+  $($('.die')[index]).text(dieValue);
+}
+
 // ------------------------------------
 // --------Model-----------------------
 // ------------------------------------
 
 var DieModel = function () {
   this.value = 0;
+};
+
+DieModel.prototype.roll = function () {
+  this.value = Math.floor((Math.random()*6)+1);
 };
 
 // ------------------------------------
@@ -53,8 +70,16 @@ function diceCollection () {
     return collection;
   };
 
+  function rollDice () {
+    $(collection).each(function(index, die) {
+      die.roll();
+    });
+    return collection;
+  }
+
   return {
-    add: add
+    add: add,
+    rollDice: rollDice
   }
 }
 
